@@ -5,6 +5,14 @@ import csv
 import io
 from datetime import date
 
+
+def _safe_cell(v):
+    """Prevent formula injection in downloaded CSV."""
+    if isinstance(v, str) and v[:1] in ("=", "+", "-", "@", "\t", "\r"):
+        return "'" + v
+    return v
+
+
 st.set_page_config(
     page_title="Redrob Candidate Ranker — Tech Adi",
     page_icon="🎯",
@@ -137,7 +145,12 @@ if uploaded:
         writer = csv.writer(csv_buf)
         writer.writerow(["candidate_id", "rank", "score", "reasoning"])
         for r in ranked:
-            writer.writerow([r["candidate_id"], r["rank"], r["score"], r["reasoning"]])
+            writer.writerow([
+                _safe_cell(r["candidate_id"]),
+                r["rank"],
+                r["score"],
+                _safe_cell(r["reasoning"]),
+            ])
 
         st.download_button(
             "⬇️ Download Submission CSV",
