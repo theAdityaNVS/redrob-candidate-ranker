@@ -1,0 +1,55 @@
+team_name: "Tech Adi"
+
+primary_contact:
+  name: "Aditya Nadamuni"
+  email: "aditya.nadamuni@gmail.com"
+  phone: "+91-XXXXXXXXXX"
+
+team_members:
+  - name: "Aditya Nadamuni"
+    email: "aditya.nadamuni@gmail.com"
+    role: "Solo Participant"
+
+github_repo: "https://github.com/adimyth/redrob-candidate-ranker"
+sandbox_link: "https://adimyth-redrob-ranker.streamlit.app"
+
+reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv"
+
+compute:
+  platform: "Windows 11 Home"
+  cpu_cores: 8
+  ram_gb: 16
+  python_version: "3.14"
+  os: "Windows 11"
+  uses_gpu_for_inference: false
+  has_network_during_ranking: false
+  pre_computation_required: false
+  pre_computation_time_minutes: 0
+
+ai_tools_used:
+  - "Claude"
+
+ai_usage_summary: |
+  Used Claude Code for architecture design, code generation, and review.
+  No candidate data was fed to any LLM. All ranking is pure rule-based Python
+  with zero LLM calls during inference.
+
+methodology_summary: |
+  Hybrid rule-based ranker with explicit anti-keyword-stuffing design.
+  Five scoring components: title+career relevance (35%), skill trust score
+  with endorsement/duration discounts (20%), behavioral signals (20%),
+  experience fit (10%), availability signals (10%), education (5%).
+  Title and career history descriptions are the decisive signals — HR Managers
+  with 9 AI skills rank far below actual ML Engineers with fewer but verified
+  skills. A trust multiplier on skills (proficiency × endorsements × duration
+  months) catches lazy keyword stuffing. Behavioral signals down-weight dormant
+  candidates. Honeypot detection flags profiles with impossible skill patterns
+  (expert in 10+ skills with 0 months duration and 0 endorsements). Runtime:
+  ~30s for 100K candidates on CPU.
+
+declarations:
+  read_submission_spec: true
+  code_is_original_work: true
+  no_collusion: true
+  honeypot_check_done: true
+  reproduction_tested: true
