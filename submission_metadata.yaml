@@ -10,8 +10,8 @@ team_members:
     email: "aditya.nadamuni@gmail.com"
     role: "Solo Participant"
 
-github_repo: "https://github.com/adimyth/redrob-candidate-ranker"
-sandbox_link: "https://adimyth-redrob-ranker.streamlit.app"
+github_repo: "https://github.com/theAdityaNVS/redrob-candidate-ranker"
+sandbox_link: "https://theaditynvs-redrob-ranker.streamlit.app"
 
 reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv"
 

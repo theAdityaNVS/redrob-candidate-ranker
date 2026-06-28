@@ -102,7 +102,7 @@ Expected output: validation passes with 100 rows, ranks 1–100, non-increasing 
 
 ## Sandbox Demo
 
-Live demo (Streamlit): [https://adimyth-redrob-ranker.streamlit.app](https://adimyth-redrob-ranker.streamlit.app)
+Live demo (Streamlit): [https://theaditynvs-redrob-ranker.streamlit.app](https://theaditynvs-redrob-ranker.streamlit.app)
 
 Upload your own `candidates.jsonl` or paste a candidate JSON to see scores broken down
 by component in real time.
