@@ -12,6 +12,13 @@ import time
 from pathlib import Path
 
 
+def _safe_cell(v):
+    """Prevent CSV/XLSX formula injection by prefixing formula-trigger chars."""
+    if isinstance(v, str) and v[:1] in ("=", "+", "-", "@", "\t", "\r"):
+        return "'" + v
+    return v
+
+
 def main():
     parser = argparse.ArgumentParser(description="Rank candidates for Redrob Senior AI Engineer JD")
     parser.add_argument("--candidates", required=True, help="Path to candidates.jsonl")
@@ -24,10 +31,10 @@ def main():
         print(f"ERROR: candidates file not found: {candidates_path}", file=sys.stderr)
         sys.exit(1)
 
-    print(f"Loading ranking engine...")
+    print("Loading ranking engine...")
     from src.engine import rank_candidates
 
-    print(f"Ranking candidates from {candidates_path} ...")
+    print(f"Ranking candidates from {candidates_path}...")
     t0 = time.time()
     results = rank_candidates(str(candidates_path), top_n=args.top_n)
     elapsed = time.time() - t0
@@ -39,7 +46,9 @@ def main():
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=["candidate_id", "rank", "score", "reasoning"])
         writer.writeheader()
-        writer.writerows(results)
+        writer.writerows(
+            {k: _safe_cell(val) for k, val in row.items()} for row in results
+        )
 
     print(f"Saved: {out_path}")
 
@@ -52,7 +61,12 @@ def main():
         ws.title = "Rankings"
         ws.append(["candidate_id", "rank", "score", "reasoning"])
         for r in results:
-            ws.append([r["candidate_id"], r["rank"], r["score"], r["reasoning"]])
+            ws.append([
+                _safe_cell(r["candidate_id"]),
+                r["rank"],
+                r["score"],
+                _safe_cell(r["reasoning"]),
+            ])
         wb.save(xlsx_path)
         print(f"Also saved: {xlsx_path}")
     except ImportError:
