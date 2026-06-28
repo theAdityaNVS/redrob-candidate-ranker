@@ -21,7 +21,7 @@ _UNRELATED_TITLES = [
 _TIER1_TITLES = [
     "ml engineer", "machine learning engineer", "ai engineer", "nlp engineer",
     "applied scientist", "search engineer", "retrieval engineer",
-    "recommendation engineer",
+    "recommendation",
 ]
 
 # Adjacent / moderate titles
@@ -83,8 +83,9 @@ _PROFICIENCY_WEIGHTS = {"beginner": 0.25, "intermediate": 0.5, "advanced": 0.75,
 
 # Normalization denominator: 5 Tier-1 expert skills @ trust ~1.0 → raw ~ 10.0
 # trust for perfect skill: (1.0*0.4 + 1.0*0.35 + 1.0*0.25) = 1.0
-# 5 * 2.0 * 1.0 = 10.0
-_SKILL_MAX_POSSIBLE = 10.0
+# 5 * 2.0 * 1.0 = 10.0 → target ~0.9 (leaving headroom for assessment-score bonus)
+# 10.0 / 0.9 ≈ 11.11
+_SKILL_MAX_POSSIBLE = 11.11  # 5 × 2.0 × 1.0 / 0.9 ≈ 11.11 to target ~0.9 for perfect skills
 
 
 # ---------------------------------------------------------------------------
@@ -409,7 +410,28 @@ def generate_reasoning(scored: dict, rank: int) -> str:
     if scored["is_honeypot"]:
         parts.append("FLAGGED: suspicious profile pattern (keyword stuffing detected)")
 
+    if rank <= 10:
+        parts.append("top-10 caliber fit")
+
     return "; ".join(parts) + "."
+
+
+# ---------------------------------------------------------------------------
+# Private helpers
+# ---------------------------------------------------------------------------
+
+def _finalize_rankings(scored_list: list, top_n: int) -> list:
+    """Sort, slice to top_n, and attach rank + reasoning."""
+    scored_list.sort(key=lambda x: (-x["score"], x["candidate_id"]))
+    results = []
+    for rank_idx, item in enumerate(scored_list[:top_n], start=1):
+        results.append({
+            "candidate_id": item["candidate_id"],
+            "rank": rank_idx,
+            "score": item["score"],
+            "reasoning": generate_reasoning(item, rank_idx),
+        })
+    return results
 
 
 # ---------------------------------------------------------------------------
@@ -428,22 +450,7 @@ def rank_candidates(candidates_path: str, top_n: int = 100) -> List[dict]:
         scored = score_candidate(candidate, ref_date)
         all_scores.append(scored)
 
-    # Sort: score descending, then candidate_id ascending for tie-breaking
-    all_scores.sort(key=lambda x: (-x["score"], x["candidate_id"]))
-
-    top = all_scores[:top_n]
-
-    results = []
-    for rank_idx, item in enumerate(top, start=1):
-        reasoning = generate_reasoning(item, rank_idx)
-        results.append({
-            "candidate_id": item["candidate_id"],
-            "rank": rank_idx,
-            "score": item["score"],
-            "reasoning": reasoning,
-        })
-
-    return results
+    return _finalize_rankings(all_scores, top_n)
 
 
 def rank_candidates_list(candidates: List[dict], top_n: int = 100) -> List[dict]:
@@ -459,18 +466,4 @@ def rank_candidates_list(candidates: List[dict], top_n: int = 100) -> List[dict]
         scored = score_candidate(candidate, ref_date)
         all_scores.append(scored)
 
-    all_scores.sort(key=lambda x: (-x["score"], x["candidate_id"]))
-
-    top = all_scores[:top_n]
-
-    results = []
-    for rank_idx, item in enumerate(top, start=1):
-        reasoning = generate_reasoning(item, rank_idx)
-        results.append({
-            "candidate_id": item["candidate_id"],
-            "rank": rank_idx,
-            "score": item["score"],
-            "reasoning": reasoning,
-        })
-
-    return results
+    return _finalize_rankings(all_scores, top_n)

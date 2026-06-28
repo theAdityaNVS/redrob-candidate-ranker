@@ -1,6 +1,5 @@
 """Data loading and preprocessing for the candidate ranking engine."""
 import json
-from pathlib import Path
 from typing import Iterator, Dict, Any, Optional
 from datetime import date, datetime
 
