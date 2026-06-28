@@ -214,7 +214,8 @@ def experience_score(candidate: dict) -> float:
     elif yoe <= 9:
         score = 0.8 + (1.0 - abs(yoe - 7) / 2.0) * 0.2
     else:
-        score = max(0.5, 1.0 - (yoe - 9) / 10.0)
+        # Gentle decay past 9 years, starting from the value at yoe=9 (0.8)
+        score = max(0.4, 0.8 - (yoe - 9) * 0.04)
 
     return min(max(score, 0.0), 1.0)
 
