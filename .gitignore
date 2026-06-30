@@ -11,3 +11,7 @@ build/
 resources/candidates.jsonl
 submission*.csv
 *.xlsx
+
+# Large source files (PDFs are the deliverables)
+ideathon_template_track1.pptx
+Tech_Adi_Ideathon_Submission.pptx
